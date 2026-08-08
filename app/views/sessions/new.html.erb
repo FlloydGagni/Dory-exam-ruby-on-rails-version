@@ -1,7 +1,12 @@
+<%# Sign-in form, rendered by SessionsController#new. Also the app's root page (`/`). %>
 <div class="mx-auto max-w-sm">
   <div class="card">
     <h1 class="mb-6 text-center text-xl font-semibold text-slate-900">Sign In</h1>
 
+    <%# Not bound to a model (no `model:` option) since credentials aren't a persisted record;
+        submits a plain POST to /login, handled by SessionsController#create. `name:` is set
+        explicitly on each field so params arrive as top-level `params[:email]`/`params[:password]`
+        rather than nested under a form object name. %>
     <%= form_with url: login_path, local: true, class: "space-y-6" do |form| %>
       <div>
         <%= form.label :email, class: "field-label" %>

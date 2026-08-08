@@ -1,3 +1,4 @@
+<%# @task is loaded by TasksController's `set_task` before_action, already scoped to current_user. %>
 <div class="card">
   <h1 class="text-2xl font-semibold text-slate-900"><%= @task.title %></h1>
 
@@ -16,6 +17,8 @@
     </div>
     <div class="py-2">
       <dt class="font-medium text-slate-500">Description</dt>
+      <%# `.presence` returns nil for both nil and "" so the fallback text also covers a
+          blank-but-not-nil description. %>
       <dd class="mt-1"><%= @task.description.presence || "No description" %></dd>
     </div>
   </dl>

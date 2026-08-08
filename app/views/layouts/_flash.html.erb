@@ -1,3 +1,6 @@
+<%# `notice` and `alert` are Rails' built-in flash accessors, set via `redirect_to ..., notice: "..."`
+    or `flash.now[:alert] = "..."` in controller actions. Rendered globally so any controller
+    can surface a success/error message without each view repeating this markup. %>
 <% if notice %>
   <div class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"><%= notice %></div>
 <% end %>

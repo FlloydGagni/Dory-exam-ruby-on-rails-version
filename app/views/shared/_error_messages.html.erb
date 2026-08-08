@@ -1,7 +1,13 @@
+<%# Generic ActiveRecord validation error list, reused across forms (task, category, user).
+    Caller passes in `object:` (e.g. `render "shared/error_messages", object: @task`);
+    renders nothing when the object has no validation errors. %>
 <% if object.errors.any? %>
   <div class="mb-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+    <%# `pluralize` picks "1 error" vs "2 errors"; `model_name.human` gives a friendly
+        singular name for the model (e.g. "Task" -> "task"). %>
     <p class="font-medium"><%= pluralize(object.errors.count, "error") %> prohibited this <%= object.model_name.human.downcase %> from being saved:</p>
     <ul class="mt-1 list-disc pl-5">
+      <%# `full_messages` combines each attribute name with its error, e.g. "Title can't be blank". %>
       <% object.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>

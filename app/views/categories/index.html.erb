@@ -1,5 +1,7 @@
+<%# Categories are global, so this list is identical for every signed-in user (see Category model). %>
 <h1 class="mb-6 text-2xl font-semibold text-slate-900">Categories</h1>
 
+<%# Shows validation errors (e.g. duplicate name) after a failed "add category" submission. %>
 <%= render "shared/error_messages", object: @category %>
 
 <div class="card">
@@ -17,6 +19,8 @@
 <div class="card mt-6">
   <h2 class="mb-4 text-lg font-semibold text-slate-900">Add a Category</h2>
 
+  <%# There's no "new category" route/page (only index/new/create are routed); this inline
+      form posts straight to POST /categories, handled by CategoriesController#create. %>
   <%= form_with model: @category, url: categories_path, local: true, class: "flex items-end gap-3" do |form| %>
     <div class="flex-1">
       <%= form.label :name, class: "field-label" %>

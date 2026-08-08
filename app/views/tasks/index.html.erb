@@ -3,14 +3,20 @@
   <%= link_to "New Task", new_task_path, class: "btn-primary" %>
 </div>
 
+<%# Filter/search bar. Submits as a GET request so the resulting URL (with ?status=, ?category_id=,
+    ?search=) is bookmarkable/shareable and matches what TasksController#index reads from params.
+    Field values are pre-filled from the current `params`, so the form reflects whatever filters
+    are already applied. %>
 <%= form_with url: tasks_path, method: :get, local: true, class: "card mb-6 flex flex-wrap items-end gap-3" do |form| %>
   <div>
     <%= form.label :status, class: "field-label" %>
+    <%# Task.statuses.keys comes from the enum in the Task model ("pending", "in_progress", "completed"). %>
     <%= form.select :status, options_for_select(Task.statuses.keys, params[:status]), { include_blank: "All Statuses" }, class: "field-input" %>
   </div>
 
   <div>
     <%= form.label :category_id, "Category", class: "field-label" %>
+    <%# @categories (all of them, set by the controller) populates the dropdown options. %>
     <%= form.collection_select :category_id, @categories, :id, :name, { include_blank: "All Categories" }, { selected: params[:category_id], class: "field-input" } %>
   </div>
 
@@ -21,6 +27,7 @@
 
   <div class="flex items-center gap-3">
     <%= form.submit "Apply", class: "btn-secondary" %>
+    <%# Resets all filters by linking back to the plain, param-free tasks path. %>
     <%= link_to "Clear", tasks_path, class: "link" %>
   </div>
 <% end %>
@@ -38,14 +45,20 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-200 bg-white">
+        <%# @tasks is already the current page's rows only (offset/limit applied in the controller). %>
         <% @tasks.each do |task| %>
           <tr>
             <td class="px-4 py-3"><%= task.title %></td>
+            <%# status_badge_classes (TasksHelper) picks the badge color; humanize turns
+                "in_progress" into "In progress" for display. %>
             <td class="px-4 py-3"><span class="<%= status_badge_classes(task.status) %>"><%= task.status.humanize %></span></td>
             <td class="px-4 py-3"><%= task.category.name %></td>
-            <td class="px-4 py-3"><%= task.due_date&.strftime("%b %d, %Y") || "—" %></td>
+            <%# Safe navigation (&.) avoids an error when due_date is nil; falls back to "-". %>
+            <td class="px-4 py-3"><%= task.due_date&.strftime("%b %d, %Y") || "-" %></td>
             <td class="px-4 py-3">
               <%= link_to "View", task_path(task), class: "link" %>
+              <%# turbo_confirm shows a native confirmation dialog before Turbo actually
+                  submits the DELETE request. %>
               <%= link_to "Delete", task_path(task), data: { turbo_method: :delete, turbo_confirm: "Delete \"#{task.title}\"? This cannot be undone." }, class: "link ml-3 text-red-600 hover:text-red-800" %>
             </td>
           </tr>
@@ -60,6 +73,8 @@
     </p>
 
     <div class="flex items-center gap-3">
+      <%# `params.permit(...)` carries the active filters over to the next/previous page link,
+          so paginating doesn't silently drop the current status/category/search filters. %>
       <% if @page > 1 %>
         <%= link_to "« Previous", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page - 1)), class: "btn-secondary" %>
       <% end %>
@@ -70,6 +85,7 @@
     </div>
   </div>
 <% else %>
+  <%# Empty state: shown both when the user has zero tasks and when filters/search matched nothing. %>
   <div class="card text-center">
     <p class="text-slate-500">No tasks match your filters.</p>
     <div class="mt-4 flex items-center justify-center gap-3">
