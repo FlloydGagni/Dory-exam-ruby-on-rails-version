@@ -7,6 +7,17 @@
   <%= link_to "Manage Categories", categories_path %>
 </p>
 
+<%= form_with url: tasks_path, method: :get, local: true do |form| %>
+  <%= form.select :status, options_for_select(Task.statuses.keys, params[:status]), { include_blank: "All Statuses" } %>
+
+  <%= form.collection_select :category_id, @categories, :id, :name, { include_blank: "All Categories" }, { selected: params[:category_id] } %>
+
+  <%= form.text_field :search, value: params[:search], placeholder: "Search by title..." %>
+
+  <%= form.submit "Apply" %>
+  <%= link_to "Clear", tasks_path %>
+<% end %>
+
 <% if @tasks.any? %>
   <table border="1" cellpadding="6">
     <thead>
@@ -33,6 +44,20 @@
       <% end %>
     </tbody>
   </table>
+
+  <p>
+    Page <%= @page %> of <%= @total_pages %> (<%= @total_count %> task<%= "s" unless @total_count == 1 %> total)
+  </p>
+
+  <p>
+    <% if @page > 1 %>
+      <%= link_to "« Previous", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page - 1)) %>
+    <% end %>
+
+    <% if @page < @total_pages %>
+      <%= link_to "Next »", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page + 1)) %>
+    <% end %>
+  </p>
 <% else %>
-  <p>No tasks yet. <%= link_to "Create your first task", new_task_path %>.</p>
+  <p>No tasks match your filters. <%= link_to "Clear filters", tasks_path %> or <%= link_to "create your first task", new_task_path %>.</p>
 <% end %>
