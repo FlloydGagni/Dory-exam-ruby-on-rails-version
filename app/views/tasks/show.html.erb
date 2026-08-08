@@ -1,0 +1,11 @@
+<h1><%= @task.title %></h1>
+
+<p><strong>Status:</strong> <%= @task.status.humanize %></p>
+<p><strong>Category:</strong> <%= @task.category.name %></p>
+<p><strong>Due Date:</strong> <%= @task.due_date&.strftime("%b %d, %Y") || "No due date" %></p>
+<p><strong>Description:</strong> <%= @task.description.presence || "No description" %></p>
+
+<p>
+  <%= link_to "Edit", edit_task_path(@task) %> |
+  <%= link_to "Back to Tasks", tasks_path %>
+</p>
