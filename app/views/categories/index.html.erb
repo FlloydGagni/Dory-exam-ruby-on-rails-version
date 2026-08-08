@@ -1,0 +1,27 @@
+<h1>Categories</h1>
+
+<% if @category.errors.any? %>
+  <div style="color: red;">
+    <ul>
+      <% @category.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<ul>
+  <% @categories.each do |category| %>
+    <li><%= category.name %></li>
+  <% end %>
+</ul>
+
+<h2>Add a Category</h2>
+
+<%= form_with model: @category, url: categories_path, local: true do |form| %>
+  <%= form.label :name %>
+  <%= form.text_field :name %>
+  <%= form.submit "Add Category" %>
+<% end %>
+
+<p><%= link_to "Back to Tasks", tasks_path %></p>
