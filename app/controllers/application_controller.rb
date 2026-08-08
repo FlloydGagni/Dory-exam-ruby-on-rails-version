@@ -7,6 +7,12 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
+  # Throttles every request app-wide (per signed-in user, or per IP when logged out) to blunt
+  # scripted abuse. Counted per-controller (see ActionController::RateLimiting's cache-key
+  # scoping). Login/signup add their own stricter limits on top of this one.
+  rate_limit to: 100, within: 1.minute, by: -> { current_user&.id || request.remote_ip },
+             with: :rate_limit_exceeded, name: "global"
+
   # Runs before every action in every controller unless that controller opts out with
   # `skip_before_action :require_login` (as SessionsController and RegistrationsController do,
   # since sign-in/sign-up must be reachable while logged out).
@@ -36,5 +42,10 @@ class ApplicationController < ActionController::Base
     if !logged_in?
       redirect_to login_path, alert: "You must be logged in to access this section."
     end
+  end
+
+  # Handler for the app-wide `rate_limit` above.
+  def rate_limit_exceeded
+    render plain: "Too many requests. Please slow down and try again shortly.", status: :too_many_requests
   end
 end
