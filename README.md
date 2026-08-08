@@ -42,6 +42,11 @@ This substitution does not change the API shape's *behavior*: protected endpoint
 
 **Categories are shared, not per-user.** Per the exam's schema (Section 4.1), the `Category` table has no `user_id`: categories are a shared, global list available to all users, while `Task` rows are individually owned via `user_id`. This is intentional and matches the specified schema exactly.
 
+**Rate limiting without a gem.** Rails 8 ships a built-in `rate_limit` controller macro (`ActionController::RateLimiting`), backed by `Rails.cache`, so no gem (e.g. `rack-attack`) or custom middleware was needed:
+- An app-wide limit in `ApplicationController` (100 requests/minute, keyed by signed-in user or IP) throttles every controller by default.
+- `POST /login` and `POST /signup` carry their own stricter limits (10 attempts/3 minutes and 5 attempts/15 minutes respectively) on top of the app-wide one, since those are the unauthenticated, brute-forceable endpoints.
+- Exceeding a limit returns `429 Too Many Requests`; login/signup re-render their form with a flash message, matching the app's existing validation-error UX.
+
 ---
 
 ## Local Setup & Run Instructions
@@ -99,6 +104,7 @@ This creates two ready-to-use accounts (credentials in the "Test Account" sectio
 - Pagination on the task list (configurable page size via `?limit=`)
 - Friendly empty states (no tasks yet, no search results) and validation error messages throughout
 - Flash messages (success/error) shown globally via the shared layout
+- Rate limiting: an app-wide request throttle plus stricter limits on login/signup to blunt brute-force and scripted abuse (see "Design Decisions" above)
 
 ---
 
@@ -129,7 +135,7 @@ Since this is a server-rendered monolith rather than a JSON API, routes serve fu
 ## Known Limitations / Trade-offs
 
 - Pagination is hand-rolled (plain `OFFSET`/`LIMIT` math) rather than using a pagination gem: a deliberate choice to keep the dependency footprint minimal and every line explainable.
-- No automated test suite was written given the one-day time constraint (listed as a bonus challenge in the exam, not a core requirement). Rails' generated test/fixture files are present but contain no assertions yet.
+- Only a minimal automated test suite exists (a handful of controller integration tests, including coverage for the rate limits above) given the one-day time constraint (listed as a bonus challenge in the exam, not a core requirement). Model-level test files are Rails-generated stubs with no assertions yet.
 - Category deletion was intentionally not implemented in the UI, since the schema has no ownership on categories and no cascade behavior was specified for tasks referencing a deleted category, avoiding an ambiguous destructive action.
 - Styling uses Tailwind utility classes applied directly in views rather than a component library: functional and clean, not a full design system.
 
