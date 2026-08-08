@@ -1,5 +1,63 @@
 <h1>My Tasks</h1>
-<p>Logged in as <%= current_user.name %> (<%= current_user.email %>)</p>
-<p><%= link_to "Log Out", logout_path, data: { turbo_method: :delete } %></p>
 
-<p><%= @tasks.count %> task(s) so far.</p>
+<p>Logged in as <%= current_user.name %> (<%= current_user.email %>) — <%= link_to "Log Out", logout_path, data: { turbo_method: :delete } %></p>
+
+<p>
+  <%= link_to "New Task", new_task_path %> |
+  <%= link_to "Manage Categories", categories_path %>
+</p>
+
+<%= form_with url: tasks_path, method: :get, local: true do |form| %>
+  <%= form.select :status, options_for_select(Task.statuses.keys, params[:status]), { include_blank: "All Statuses" } %>
+
+  <%= form.collection_select :category_id, @categories, :id, :name, { include_blank: "All Categories" }, { selected: params[:category_id] } %>
+
+  <%= form.text_field :search, value: params[:search], placeholder: "Search by title..." %>
+
+  <%= form.submit "Apply" %>
+  <%= link_to "Clear", tasks_path %>
+<% end %>
+
+<% if @tasks.any? %>
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Category</th>
+        <th>Due Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @tasks.each do |task| %>
+        <tr>
+          <td><%= task.title %></td>
+          <td><%= task.status.humanize %></td>
+          <td><%= task.category.name %></td>
+          <td><%= task.due_date&.strftime("%b %d, %Y") || "—" %></td>
+          <td>
+            <%= link_to "View", task_path(task) %> |
+            <%= link_to "Delete", task_path(task), data: { turbo_method: :delete, turbo_confirm: "Delete \"#{task.title}\"? This cannot be undone." } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <p>
+    Page <%= @page %> of <%= @total_pages %> (<%= @total_count %> task<%= "s" unless @total_count == 1 %> total)
+  </p>
+
+  <p>
+    <% if @page > 1 %>
+      <%= link_to "« Previous", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page - 1)) %>
+    <% end %>
+
+    <% if @page < @total_pages %>
+      <%= link_to "Next »", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page + 1)) %>
+    <% end %>
+  </p>
+<% else %>
+  <p>No tasks match your filters. <%= link_to "Clear filters", tasks_path %> or <%= link_to "create your first task", new_task_path %>.</p>
+<% end %>

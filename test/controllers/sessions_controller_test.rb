@@ -18,6 +18,8 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     User.create!(name: "Test", email: "test@example.com", password: "password", password_confirmation: "password")
     post login_path, params: { email: "test@example.com", password: "password" }
     assert_redirected_to tasks_path
+    follow_redirect!
+    assert_response :success
   end
 
   test "login succeeds when email casing differs from what was stored (e.g. browser autocapitalized it)" do
