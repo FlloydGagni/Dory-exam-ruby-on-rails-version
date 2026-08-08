@@ -9,16 +9,23 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
+  # Defines the root path route ("/"). Landing on the sign-in form makes sense since every
+  # other route requires being logged in (see ApplicationController#require_login).
   root "sessions#new"
 
+  # Sign-up: separate GET (show the form) and POST (submit it) routes, both handled by
+  # RegistrationsController, which is exempt from the login requirement.
   get "signup" => "registrations#new"
   post "signup" => "registrations#create"
 
+  # Sign-in/out: handled by SessionsController, also exempt from the login requirement.
   get "login" => "sessions#new"
   post "login" => "sessions#create"
   delete "logout" => "sessions#destroy"
 
+  # Categories are intentionally limited to index/new/create: there's no per-category show/
+  # edit/delete UI (see README "Known Limitations" for why deletion isn't implemented).
   resources :categories, only: [ :index, :new, :create ]
+  # Tasks get the full RESTful set: index, new, create, show, edit, update, destroy.
   resources :tasks
 end
