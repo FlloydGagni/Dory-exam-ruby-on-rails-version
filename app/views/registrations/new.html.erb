@@ -1,9 +1,13 @@
+<%# Sign-up form, rendered by RegistrationsController#new (and re-rendered with errors by #create). %>
 <div class="mx-auto max-w-sm">
   <div class="card">
     <h1 class="mb-6 text-center text-xl font-semibold text-slate-900">Sign Up</h1>
 
+    <%# Shows validation errors (e.g. duplicate email) after a failed submission. %>
     <%= render "shared/error_messages", object: @user %>
 
+    <%# Bound to @user, so field names/values are populated automatically and the form
+        re-shows whatever the user typed if submission fails. Posts to /signup either way. %>
     <%= form_with model: @user, url: signup_path, local: true, class: "space-y-6" do |form| %>
       <div>
         <%= form.label :name, class: "field-label" %>

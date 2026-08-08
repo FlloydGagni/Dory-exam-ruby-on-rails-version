@@ -1,4 +1,8 @@
+<%# Shared form for both New Task and Edit Task, rendered with `render "form", task:, categories:`.
+    `form_with model: task` picks the right URL/HTTP verb automatically: POST /tasks for a new,
+    unsaved task, or PATCH /tasks/:id for an existing one. %>
 <%= form_with model: task, local: true, class: "space-y-6" do |form| %>
+  <%# Shows validation errors (e.g. missing title) after a failed submission. %>
   <%= render "shared/error_messages", object: task %>
 
   <div>
@@ -14,6 +18,8 @@
   <div class="grid gap-6 sm:grid-cols-2">
     <div>
       <%= form.label :status, class: "field-label" %>
+      <%# Task.statuses.keys comes from the enum in the Task model; no blank option since
+          the model always defaults new tasks to "pending". %>
       <%= form.select :status, Task.statuses.keys, {}, class: "field-input" %>
     </div>
 
@@ -25,10 +31,14 @@
 
   <div>
     <%= form.label :category_id, "Category", class: "field-label" %>
+    <%# `categories` is passed in by the calling view (new.html.erb / edit.html.erb).
+        `prompt:` requires an explicit choice (unlike the index filter, which allows "All"). %>
     <%= form.collection_select :category_id, categories, :id, :name, { prompt: "Select a category" }, { class: "field-input" } %>
   </div>
 
   <div class="flex items-center gap-3">
+    <%# No label passed to `submit`, so Rails infers "Create Task" or "Update Task" from
+        whether `task` is a new or persisted record. %>
     <%= form.submit class: "btn-primary" %>
     <%= link_to "Cancel", tasks_path, class: "link" %>
   </div>

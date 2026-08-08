@@ -24,10 +24,13 @@
   </head>
 
   <body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    <%# Nav bar is only meaningful once someone is signed in (it links to Tasks/Categories/Log Out). %>
     <%= render "layouts/header" if logged_in? %>
 
     <main class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <%# Renders any notice/alert flash message set by a controller action, on every page. %>
       <%= render "layouts/flash" %>
+      <%# Renders the content of whichever view the current controller action is showing. %>
       <%= yield %>
     </main>
   </body>
