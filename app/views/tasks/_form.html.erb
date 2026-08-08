@@ -1,0 +1,35 @@
+<%= form_with model: task, local: true, class: "space-y-6" do |form| %>
+  <%= render "shared/error_messages", object: task %>
+
+  <div>
+    <%= form.label :title, class: "field-label" %>
+    <%= form.text_field :title, class: "field-input" %>
+  </div>
+
+  <div>
+    <%= form.label :description, class: "field-label" %>
+    <%= form.text_area :description, rows: 4, class: "field-input" %>
+  </div>
+
+  <div class="grid gap-6 sm:grid-cols-2">
+    <div>
+      <%= form.label :status, class: "field-label" %>
+      <%= form.select :status, Task.statuses.keys, {}, class: "field-input" %>
+    </div>
+
+    <div>
+      <%= form.label :due_date, class: "field-label" %>
+      <%= form.date_field :due_date, class: "field-input" %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :category_id, "Category", class: "field-label" %>
+    <%= form.collection_select :category_id, categories, :id, :name, { prompt: "Select a category" }, { class: "field-input" } %>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= form.submit class: "btn-primary" %>
+    <%= link_to "Cancel", tasks_path, class: "link" %>
+  </div>
+<% end %>

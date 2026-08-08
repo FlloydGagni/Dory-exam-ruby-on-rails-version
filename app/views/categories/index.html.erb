@@ -1,27 +1,29 @@
-<h1>Categories</h1>
+<h1 class="mb-6 text-2xl font-semibold text-slate-900">Categories</h1>
 
-<% if @category.errors.any? %>
-  <div style="color: red;">
-    <ul>
-      <% @category.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
+<%= render "shared/error_messages", object: @category %>
+
+<div class="card">
+  <% if @categories.any? %>
+    <ul class="divide-y divide-slate-100">
+      <% @categories.each do |category| %>
+        <li class="py-2 text-sm"><%= category.name %></li>
       <% end %>
     </ul>
-  </div>
-<% end %>
-
-<ul>
-  <% @categories.each do |category| %>
-    <li><%= category.name %></li>
+  <% else %>
+    <p class="text-sm text-slate-500">No categories yet.</p>
   <% end %>
-</ul>
+</div>
 
-<h2>Add a Category</h2>
+<div class="card mt-6">
+  <h2 class="mb-4 text-lg font-semibold text-slate-900">Add a Category</h2>
 
-<%= form_with model: @category, url: categories_path, local: true do |form| %>
-  <%= form.label :name %>
-  <%= form.text_field :name %>
-  <%= form.submit "Add Category" %>
-<% end %>
+  <%= form_with model: @category, url: categories_path, local: true, class: "flex items-end gap-3" do |form| %>
+    <div class="flex-1">
+      <%= form.label :name, class: "field-label" %>
+      <%= form.text_field :name, class: "field-input" %>
+    </div>
+    <%= form.submit "Add Category", class: "btn-primary" %>
+  <% end %>
+</div>
 
-<p><%= link_to "Back to Tasks", tasks_path %></p>
+<p class="mt-6"><%= link_to "Back to Tasks", tasks_path, class: "link" %></p>

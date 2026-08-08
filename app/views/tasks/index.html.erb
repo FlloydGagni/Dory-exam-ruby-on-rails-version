@@ -1,63 +1,80 @@
-<h1>My Tasks</h1>
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-2xl font-semibold text-slate-900">My Tasks</h1>
+  <%= link_to "New Task", new_task_path, class: "btn-primary" %>
+</div>
 
-<p>Logged in as <%= current_user.name %> (<%= current_user.email %>) — <%= link_to "Log Out", logout_path, data: { turbo_method: :delete } %></p>
+<%= form_with url: tasks_path, method: :get, local: true, class: "card mb-6 flex flex-wrap items-end gap-3" do |form| %>
+  <div>
+    <%= form.label :status, class: "field-label" %>
+    <%= form.select :status, options_for_select(Task.statuses.keys, params[:status]), { include_blank: "All Statuses" }, class: "field-input" %>
+  </div>
 
-<p>
-  <%= link_to "New Task", new_task_path %> |
-  <%= link_to "Manage Categories", categories_path %>
-</p>
+  <div>
+    <%= form.label :category_id, "Category", class: "field-label" %>
+    <%= form.collection_select :category_id, @categories, :id, :name, { include_blank: "All Categories" }, { selected: params[:category_id], class: "field-input" } %>
+  </div>
 
-<%= form_with url: tasks_path, method: :get, local: true do |form| %>
-  <%= form.select :status, options_for_select(Task.statuses.keys, params[:status]), { include_blank: "All Statuses" } %>
+  <div>
+    <%= form.label :search, "Search", class: "field-label" %>
+    <%= form.text_field :search, value: params[:search], placeholder: "Search by title...", class: "field-input" %>
+  </div>
 
-  <%= form.collection_select :category_id, @categories, :id, :name, { include_blank: "All Categories" }, { selected: params[:category_id] } %>
-
-  <%= form.text_field :search, value: params[:search], placeholder: "Search by title..." %>
-
-  <%= form.submit "Apply" %>
-  <%= link_to "Clear", tasks_path %>
+  <div class="flex items-center gap-3">
+    <%= form.submit "Apply", class: "btn-secondary" %>
+    <%= link_to "Clear", tasks_path, class: "link" %>
+  </div>
 <% end %>
 
 <% if @tasks.any? %>
-  <table border="1" cellpadding="6">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Category</th>
-        <th>Due Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @tasks.each do |task| %>
+  <div class="overflow-hidden rounded-lg border border-slate-200">
+    <table class="min-w-full divide-y divide-slate-200 text-sm">
+      <thead class="bg-slate-50">
         <tr>
-          <td><%= task.title %></td>
-          <td><%= task.status.humanize %></td>
-          <td><%= task.category.name %></td>
-          <td><%= task.due_date&.strftime("%b %d, %Y") || "—" %></td>
-          <td>
-            <%= link_to "View", task_path(task) %> |
-            <%= link_to "Delete", task_path(task), data: { turbo_method: :delete, turbo_confirm: "Delete \"#{task.title}\"? This cannot be undone." } %>
-          </td>
+          <th class="px-4 py-2 text-left font-medium text-slate-500">Title</th>
+          <th class="px-4 py-2 text-left font-medium text-slate-500">Status</th>
+          <th class="px-4 py-2 text-left font-medium text-slate-500">Category</th>
+          <th class="px-4 py-2 text-left font-medium text-slate-500">Due Date</th>
+          <th class="px-4 py-2 text-left font-medium text-slate-500">Actions</th>
         </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 bg-white">
+        <% @tasks.each do |task| %>
+          <tr>
+            <td class="px-4 py-3"><%= task.title %></td>
+            <td class="px-4 py-3"><span class="<%= status_badge_classes(task.status) %>"><%= task.status.humanize %></span></td>
+            <td class="px-4 py-3"><%= task.category.name %></td>
+            <td class="px-4 py-3"><%= task.due_date&.strftime("%b %d, %Y") || "—" %></td>
+            <td class="px-4 py-3">
+              <%= link_to "View", task_path(task), class: "link" %>
+              <%= link_to "Delete", task_path(task), data: { turbo_method: :delete, turbo_confirm: "Delete \"#{task.title}\"? This cannot be undone." }, class: "link ml-3 text-red-600 hover:text-red-800" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-4 flex items-center justify-between">
+    <p class="text-sm text-slate-500">
+      Page <%= @page %> of <%= @total_pages %> (<%= @total_count %> task<%= "s" unless @total_count == 1 %> total)
+    </p>
+
+    <div class="flex items-center gap-3">
+      <% if @page > 1 %>
+        <%= link_to "« Previous", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page - 1)), class: "btn-secondary" %>
       <% end %>
-    </tbody>
-  </table>
 
-  <p>
-    Page <%= @page %> of <%= @total_pages %> (<%= @total_count %> task<%= "s" unless @total_count == 1 %> total)
-  </p>
-
-  <p>
-    <% if @page > 1 %>
-      <%= link_to "« Previous", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page - 1)) %>
-    <% end %>
-
-    <% if @page < @total_pages %>
-      <%= link_to "Next »", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page + 1)) %>
-    <% end %>
-  </p>
+      <% if @page < @total_pages %>
+        <%= link_to "Next »", tasks_path(params.permit(:status, :category_id, :search).merge(page: @page + 1)), class: "btn-secondary" %>
+      <% end %>
+    </div>
+  </div>
 <% else %>
-  <p>No tasks match your filters. <%= link_to "Clear filters", tasks_path %> or <%= link_to "create your first task", new_task_path %>.</p>
+  <div class="card text-center">
+    <p class="text-slate-500">No tasks match your filters.</p>
+    <div class="mt-4 flex items-center justify-center gap-3">
+      <%= link_to "Clear filters", tasks_path, class: "link" %>
+      <%= link_to "Create your first task", new_task_path, class: "btn-primary" %>
+    </div>
+  </div>
 <% end %>
