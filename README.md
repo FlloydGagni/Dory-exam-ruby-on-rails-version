@@ -75,7 +75,7 @@ This substitution does not change the API shape's *behavior*: protected endpoint
    bin/rails db:migrate
 ```
 
-`config/database.yml` connects to PostgreSQL using the default local role and no password in development/test, matching a standard local Postgres install. No `.env` file is required to run the app locally; the only environment variable read at runtime is `DORY_TASK_TRACKER_DATABASE_PASSWORD`, used solely in the production database config.
+`config/database.yml` connects to PostgreSQL using the default local role and no password in development/test, matching a standard local Postgres install; no `.env` file is required to run the app locally. `.env.example` documents the environment variables the app reads in production (`DATABASE_URL`, `RAILS_MASTER_KEY`) - copy it to `.env` (`cp .env.example .env`) purely as a local reference if useful; the app itself doesn't load `.env` automatically (no dotenv loading is configured), these values are only consumed via real environment variables in deployment.
 
 4. Seed test accounts and sample data:
 ```bash
