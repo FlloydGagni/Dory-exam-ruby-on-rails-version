@@ -33,4 +33,11 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: " test@example.com ", password: "password" }
     assert_redirected_to tasks_path
   end
+
+  test "too many login attempts returns 429 with alert" do
+    10.times { post login_path, params: { email: "nope@example.com", password: "wrong" } }
+    post login_path, params: { email: "nope@example.com", password: "wrong" }
+    assert_response :too_many_requests
+    assert_match "Too many login attempts", response.body
+  end
 end
