@@ -5,6 +5,10 @@ class RegistrationsController < ApplicationController
   # global login requirement.
   skip_before_action :require_login
 
+  # Stricter throttle specifically on POST /signup, since account creation is cheap to
+  # automate: 5 attempts per IP every 15 minutes (on top of the app-wide limit above).
+  rate_limit to: 5, within: 15.minutes, only: :create, name: "signup", with: :too_many_signup_attempts
+
   # GET /signup - renders the sign-up form.
   def new
     @user = User.new
@@ -32,5 +36,12 @@ class RegistrationsController < ApplicationController
   # matches `password` before saving.
   def user_params
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
+  end
+
+  # Handler for the signup rate_limit above.
+  def too_many_signup_attempts
+    @user = User.new # keep the re-rendered form bound to an (empty) model, like #new does
+    flash.now[:alert] = "Too many signup attempts. Please wait a few minutes and try again."
+    render :new, status: :too_many_requests
   end
 end

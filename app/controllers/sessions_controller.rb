@@ -5,6 +5,10 @@ class SessionsController < ApplicationController
   # logged-out visitor needs to reach this controller in order to log in at all.
   skip_before_action :require_login
 
+  # Stricter throttle specifically on POST /login to blunt brute-force password guessing:
+  # 10 attempts per IP every 3 minutes (on top of the app-wide limit in ApplicationController).
+  rate_limit to: 10, within: 3.minutes, only: :create, name: "login", with: :too_many_login_attempts
+
   # GET /login - renders the sign-in form. Also the app's root path.
   def new
   end
@@ -32,5 +36,13 @@ class SessionsController < ApplicationController
   def destroy
     session[:user_id] = nil
     redirect_to root_path, notice: "You have been logged out."
+  end
+
+  private
+
+  # Handler for the login rate_limit above.
+  def too_many_login_attempts
+    flash.now[:alert] = "Too many login attempts. Please wait a few minutes and try again."
+    render :new, status: :too_many_requests
   end
 end
